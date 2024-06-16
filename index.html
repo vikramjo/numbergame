@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Operation Guessing Game</title>
+    <style>
+      body{
+        font-family: Arial, sans-serif;
+        text-align: center;
+        background: black;
+        color: white;
+      }
+      .op{
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Which is bigger?</h1>
+    <button class="showbutton">Show Numbers</button>
+    <div class="ops"></div>
+    <p class="corrects">Corrects: <span>0</span></p>
+    <p class="incorrects">Incorrects: <span>0</span></p>
+    <p class="lasttime">Last Try Time: <span>0</span>ms</p>
+    <p class="avgtime">Avg Time: <span>0</span>ms</p>
+    <script type="text/javascript">
+      const getRandomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+      const generateOperation = (min, max) => getRandomInt(min, max) + " " + ["+", "-", "*", "/"][getRandomInt(0, 3)] + " " + getRandomInt(min, max);
+      const increaseX = (el) => {
+        document.querySelector(el).textContent = parseInt(document.querySelector(el).textContent) + 1;
+        document.querySelector(".ops").dataset.totalturns = parseInt(document.querySelector(".ops").dataset.totalturns || 0) + 1;
+      }
+      const isItCorrect = (selected, start_time) => {
+        selected.dataset.winner ? increaseX(".corrects > span") : increaseX(".incorrects > span");
+        document.querySelector(".showbutton").style.display = "inline-block";
+        document.querySelector(".ops").style.display = "none";
+        document.querySelector(".lasttime > span").textContent = Date.now() - start_time;
+        const totalTurns = parseInt(document.querySelector(".corrects > span").textContent) + parseInt(document.querySelector(".incorrects > span").textContent)
+        document.querySelector(".avgtime > span").textContent = parseInt((parseInt(document.querySelector(".avgtime > span").textContent)*(document.querySelector(".ops").dataset.totalturns - 1) + parseInt(document.querySelector(".lasttime > span").textContent))/document.querySelector(".ops").dataset.totalturns);
+      }
+      const startgame = (num_of_items, min, max) => {
+        const start_time = Date.now();
+        document.querySelector(".showbutton").style.display = "none";
+        const ops = document.querySelector(".ops");
+        ops.textContent = "";
+        let op, winnerOp;
+        let collection = [];
+        [...Array(num_of_items)].forEach((op) => {
+          op = document.createElement("p");
+          op.classList.add("op");
+          op.textContent = generateOperation(min, max);
+          if(collection.length == 0) collection.push(eval(op.textContent));
+          else{
+            while(collection.includes(eval(op.textContent))) op.textContent = generateOperation(min, max);
+            collection.push(eval(op.textContent));
+          }
+          if(!winnerOp || eval(op.textContent) > eval(winnerOp.textContent)) winnerOp = op;
+          op.addEventListener("click", () => isItCorrect(op, start_time));
+          ops.appendChild(op);
+          ops.style.display = "block";
+        });
+        winnerOp.dataset.winner = true;
+      }
+      const shownums = (num_of_items, min, max) => document.querySelector(".showbutton").addEventListener("click", () => startgame(num_of_items, min, max));
+      shownums(2, 1, 10);
+    </script>
+  </body>
+</html>
